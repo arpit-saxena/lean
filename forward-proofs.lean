@@ -89,3 +89,23 @@ theorem prop_comp_tactical (a b c : Prop) (hab : a -> b) (hbc : b -> c) :
     have hc : c' :=
       hbc hb
     exact hc
+
+def reverse {α : Type} (x : List α) : List α:=
+  match x with
+  | []      => []
+  | x :: xs => reverse xs ++ [x]
+
+theorem reverse_append {α : Type}:
+  ∀xs ys : List α,
+    reverse (xs ++ ys) = reverse ys ++ reverse xs :=
+  fun (xs: List α) => fun(ys: List α) =>
+  match xs with
+  | []      => by simp [reverse]
+  | x :: xs => by simp [reverse, reverse_append xs]
+
+theorem reverse_reverse {α : Type}:
+  ∀xs : List α, reverse (reverse xs) = xs :=
+  fun (xs: List α) =>
+  match xs with
+  | []      => by rfl
+  | x :: xs => by simp[reverse, reverse_append, reverse_reverse xs]
