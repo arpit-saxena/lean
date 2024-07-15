@@ -170,6 +170,40 @@ theorem map_zip {α α' β β' : Type} (f : α -> α') (g : β -> β') :
     | []     , _       => by rfl
     | _ :: _ , []      => by rfl
 
+inductive BTree (α: Type) : Type where
+  | empty : BTree α
+  | node  : α -> BTree α -> BTree α -> BTree α
 
+def mirror {α: Type} : BTree α -> BTree α
+  | BTree.empty       => BTree.empty
+  | BTree.node a l r  => BTree.node a (mirror r) (mirror l)
+
+theorem mirror_mirror {α: Type} (t: BTree α) :
+  mirror (mirror t) = t :=
+  by
+    induction t with
+    | empty         => rfl
+    | node a l r ih_l ih_r => simp[mirror, ih_l, ih_r]
+
+theorem mirror_mirror_calc {α: Type}:
+  ∀t : BTree α, mirror (mirror t) = t
+  | BTree.empty => by rfl
+  | BTree.node a l r =>
+    calc
+      mirror (mirror (BTree.node a l r)) = mirror (BTree.node a (mirror r) (mirror l))
+        := by rfl
+      _ = BTree.node a (mirror (mirror l)) (mirror (mirror r))
+        := by rfl
+      _ = BTree.node a l (mirror (mirror r))
+        := by rw [mirror_mirror_calc l]
+      _ = BTree.node a l r
+        := by rw [mirror_mirror_calc r]
+
+theorem mirror_Eq_empty_Iff {α: Type} :
+  ∀t : BTree α, mirror t = BTree.empty ↔ t = BTree.empty
+  | BTree.empty       => by rfl
+  | BTree.node _ _ _  => by simp[mirror]
+
+-- SKIPPING Dependent Inductive Types
 
 end FunctionalProg
