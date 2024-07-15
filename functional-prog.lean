@@ -204,6 +204,23 @@ theorem mirror_Eq_empty_Iff {α: Type} :
   | BTree.empty       => by rfl
   | BTree.node _ _ _  => by simp[mirror]
 
--- SKIPPING Dependent Inductive Types
+-- Dependent Inductive Types
+
+inductive Vec (α : Type) : ℕ -> Type where
+  | nil                               : Vec α 0
+  | cons (a: α) {n : ℕ} (v : Vec α n) : Vec α (n + 1)
+
+def listOfVec {α : Type} : ∀{n : ℕ}, Vec α n -> List α
+  | _, Vec.nil        => []
+  | _, Vec.cons a v   => a :: listOfVec v
+
+def vecOfList {α : Type} : ∀xs : List α, Vec α (List.length xs)
+  | []       => Vec.nil
+  | x :: xs' => Vec.cons x (vecOfList xs')
+
+theorem length_listOfVec {α : Type} :
+  ∀(n : ℕ) (v : Vec α n), List.length (listOfVec v) = n
+  | _, Vec.nil => rfl
+  | _, Vec.cons _ v => by simp[listOfVec, length_listOfVec _ v]
 
 end FunctionalProg
