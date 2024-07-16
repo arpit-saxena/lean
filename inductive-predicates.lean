@@ -51,7 +51,7 @@ theorem no_Step_to_0_0 (s : Score) :
 inductive Star {α: Type} (R: α -> α -> Prop) : α -> α -> Prop where
   | base (a b : α)    : R a b -> Star R a b
   | refl (a : α)      : Star R a a
-  | trans (a b c : α) : R a b -> R b c -> Star R a c
+  | trans (a b c : α) : Star R a b -> Star R b c -> Star R a c
 
 theorem mod_two_Eq_zero_of_even (n : ℕ) (h : Even n) :
   n % 2 = 0 :=
@@ -59,5 +59,32 @@ theorem mod_two_Eq_zero_of_even (n : ℕ) (h : Even n) :
     induction h with
     | zero => rfl
     | add_two _ _ ih => simp[ih]
+
+theorem Star_Star_Iff_Star {α : Type} (R : α -> α -> Prop) (a b : α):
+  Star (Star R) a b <-> Star R a b :=
+  by
+    apply Iff.intro
+    (
+      intro h
+      induction h with
+      | base _ _ hab => exact hab
+      | refl a => apply Star.refl
+      | trans a b c _ _ ihab ihbc => apply Star.trans a b c ihab ihbc
+    )
+    (
+      intro h
+      apply Star.base
+      exact h
+    )
+
+@[simp] theorem Star_Star_eq_Star {α : Type} (R: α -> α -> Prop) :
+  Star (Star R) = Star R :=
+  by
+    apply funext
+    intro a
+    apply funext
+    intro b
+    apply propext
+    apply Star_Star_Iff_Star
 
 end InductivePredicates
