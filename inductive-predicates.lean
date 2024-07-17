@@ -87,4 +87,57 @@ theorem Star_Star_Iff_Star {α : Type} (R : α -> α -> Prop) (a b : α):
     apply propext
     apply Star_Star_Iff_Star
 
+theorem Even_Iff (n : ℕ) :
+  Even n <-> n = 0 ∨ (∃m : ℕ, n = m + 2 ∧ Even m) :=
+  by
+    apply Iff.intro
+    {
+      intro hn
+      cases hn with
+      | zero => simp
+      | add_two k hk => {
+        apply Or.intro_right
+        apply Exists.intro k
+        simp[hk]
+      }
+    }
+    {
+      intro hor
+      cases hor with
+      | inl h0 => simp[h0, Even.zero]
+      | inr hm => {
+        cases hm with
+        | intro k hand => {
+          cases hand with
+          | intro heq hk => simp[hk, Even.add_two, heq]
+        }
+      }
+    }
+
+theorem Even_iff_struct (n : ℕ) :
+  Even n <-> n = 0 ∨ (∃m : ℕ, n = m + 2 ∧ Even m) :=
+  Iff.intro
+    (
+      fun (heven) =>
+      match heven with
+      | Even.zero => by simp
+      | Even.add_two k heven_k => Or.inr (
+        show ∃m, k + 2 = m + 2 ∧ Even m from
+          Exists.intro k (by simp[*])
+      )
+    )
+    (
+      fun (hor) =>
+      match hor with
+      | Or.inl hn_eq_0 =>
+        show Even n from
+          by simp[Even.zero, hn_eq_0]
+      | Or.inr hexists =>
+        match hexists with
+        | Exists.intro m hand =>
+          match hand with
+          | And.intro heq hm =>
+            by simp[Even.add_two, hm, heq]
+    )
+
 end InductivePredicates
