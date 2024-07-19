@@ -282,4 +282,30 @@ inductive WellFormed {α β : Type} (arity : α -> ℕ) :
 
 -- skipped an inductive definition
 
+-- Section 6.7 : Induction Pitfalls
+
+theorem Not_even_two_mul_add_one (m n : ℕ) (hm: m = 2 * n + 1) :
+  ¬ Even m :=
+  by
+    intro h
+    induction h generalizing n with
+    | zero => simp at hm
+    | add_two m' _ ih =>
+      apply ih (n - 1)
+      /-
+      case add_two
+      m m' : ℕ
+      a✝ : Even m'
+      ih : ∀ (n : ℕ), m' = 2 * n + 1 → False
+      n : ℕ
+      hm : m' + 2 = 2 * n + 1
+      ⊢ m' = 2 * (n - 1) + 1
+      -/
+      -- NO CLUE why I have to do cases here instead of something more simpler??
+      cases n with
+      | zero => simp [Nat.ctor_eq_zero] at *
+      | succ n' =>
+        simp [Nat.succ_eq_add_one] at *
+        linarith
+
 end InductivePredicates
